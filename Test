@@ -1,0 +1,38 @@
+/**
+ * Transforms a flat associative array into a nested hierarchy based on the 'aaa' key.
+ *
+ * @param array $items The input array of associative arrays.
+ * @return array The nested hierarchy.
+ */
+public function buildHierarchy(array $items): array
+{
+    $nested = [];
+    $indexedMap = [];
+
+    // First, index everything by its ID so we can find parents instantly
+    foreach ($items as $item) {
+        // Ensure every item has a children key initialized
+        $item['children'] = [];
+        $indexedMap[$item['id']] = $item;
+    }
+
+    // Second, build the tree using references
+    foreach ($indexedMap as $id => &$item) {
+        $parentId = $item['aaa'];
+
+        if ($parentId === null) {
+            // It's a root element
+            $nested[] = &$item;
+        } else {
+            // It's a child; attach it to the parent if the parent exists
+            if (isset($indexedMap[$parentId])) {
+                $indexedMap[$parentId]['children'][] = &$item;
+            } else {
+                // Optional: Handle cases where 'aaa' points to a non-existent ID
+                $nested[] = &$item;
+            }
+        }
+    }
+
+    return $nested;
+}
